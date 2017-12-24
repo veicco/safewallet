@@ -1,60 +1,79 @@
 pragma solidity ^0.4.19;
 
+/*
+A wallet contract which is intended to be more secure than pure address wallets.
+
+The contract has two different user roles: 1) the owner, and 2) the user.
+Only the user is allowed to request withdrawals from the contract. In case
+a withdrawal is requested, the contract fires an event, allowing a client
+program to send a notification to the owner's email address. Within a specified
+waiting period, the owner can cancel the withdrawal and freeze the wallet, for
+example if the requested withdrawal was made by a hacker.
+
+The idea is that one do not have to worry about keeping the private key file of
+the user account in devices that are conneced to Internet, if the owner address
+is stored securely. The owner address is needed only when the contract is
+deployed, when the contract settings are modified, when a request is must be
+cancelled, or when the contract is killed ( in which case the remaining funds are
+transferred to the owner.
+
+Future features:
+ - ability for the owner to add trusted withdrawal addresses
+*/
 contract SafeWallet {
 
-  // structs
+  /* Data */
   struct Withdrawal {
      uint timestamp;
-     address requestor;
      address to;
      uint wei_amount;
   }
+  address public owner;
+  address public user;
+  // requested withdrawals that can be completed when enough time has passed
+  Withdrawal[] private pendingWithdrawals;
 
-  // data
-  address public owner; // super user who can cancel a withdrawal, add users, or kill the contract
-  address[] public users; // users who can request withdrawals
-  Withdrawal[] public pendingWithdrawals; // requested withdrawals that can be completed when enough time has passed
-
-  // events
+  /* Events */
   event WithdrawalRequest(Withdrawal withdrawal);
   event WithdrawalComplete(Withdrawal withdrawal, uint timestamp);
 
   /// construct the contract
-  function SafeWallet() public {
-    owner = msg.sender; // the contract creator becomes the owner
+  function SafeWallet(address _user) public {
+    // the contract creator becomes the owner
+    owner = msg.sender;
+    // the user must be specified by the contract creator
+    user = _user;
   }
-
-  /// create a new user who can request withdrawals
-  function createUser(address _address) public {
-    require(msg.sender == owner);
-    users.push(_address);
-  }
-
-  /// remove a new user from the users who can request withdrawals
-  /*
-  function removeUser(string _name) public {
-    //TODO
-  }
-  */
 
   /// WIP: request for transfer of the given wei amount of funds to the given address
   function requestWithdrawal(address _to, uint _wei_amount) public {
-    pendingWithdrawals.push(Withdrawal(now, msg.sender, _to, _wei_amount));
+    pendingWithdrawals.push(Withdrawal(now, _to, _wei_amount));
     // TODO: fire an event
   }
 
-  /// WIP: complete the pending withdrawals that have passed the waiting period (transfer the funds)
+  /// WIP: complete the pending withdrawals that have passed the waiting period
   function completeWithdrawals() public {
     for (uint index = 0; index < pendingWithdrawals.length; index++) {
       // TODO: check if enough time passed
+
+      // execute the transfer
       pendingWithdrawals[index].to.transfer(pendingWithdrawals[index].wei_amount);
-      // TODO: remove from the pending list
+      // remove the Withdrawal from the pendingWithdrawals list
+      pendingWithdrawals[index] = pendingWithdrawals[pendingWithdrawals.length - 1];
+      pendingWithdrawals.length--;
     }
     // TODO: fire an event
   }
 
-  /// WIP: deposit funds to the safe wallet contract
-  function deposit() public payable {
+  /// Kill the contract and return the remaining funds to the owner
+  function kill() public {
+    if(msg.sender == owner) {
+       selfdestruct(owner);
+     }
+  }
+
+  /// WIP: deposit funds to the contract
+  function () public payable {
     // TODO: fire an event
   }
 
