@@ -1,4 +1,4 @@
-pragma solidity ^0.4.19;
+pragma solidity ^0.4.18;
 
 /*
 A wallet contract which is intended to be more secure than pure address wallets.
@@ -58,6 +58,7 @@ contract SafeWallet {
 
       // execute the transfer
       pendingWithdrawals[index].to.transfer(pendingWithdrawals[index].wei_amount);
+
       // remove the Withdrawal from the pendingWithdrawals list
       pendingWithdrawals[index] = pendingWithdrawals[pendingWithdrawals.length - 1];
       pendingWithdrawals.length--;
