@@ -12,10 +12,11 @@ example if the requested withdrawal was made by a hacker.
 
 The idea is that one do not have to worry about keeping the private key file of
 the user account in devices that are connected to the Internet, as long as the
-owner address is stored securely. The owner address is needed only when the contract
-is deployed, when the contract settings are modified, when a request is must be
-cancelled, or when the contract is killed (in which case the remaining funds are
-transferred to the owner.
+owner address is stored securely. The owner address/account is however needed
+in the following cases: when the contract is deployed, when the contract settings
+are modified, when a request must be cancelled, or when the contract is killed
+(in which case the remaining funds are transferred to the owner. These special
+transactions can be generated offline to ensure security.
 */
 contract SafeWallet {
 
