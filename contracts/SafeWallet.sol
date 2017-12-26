@@ -25,10 +25,10 @@ contract SafeWallet {
      address to;
      uint wei_amount;
   }
-  address public owner;
-  address public user;
+  address private owner;
+  address private user;
   // requested withdrawals that can be completed when enough time has passed
-  Withdrawal[] public pendingWithdrawals;
+  Withdrawal[] private pendingWithdrawals;
 
   /* Events */
   event WithdrawalRequest(Withdrawal withdrawal);
@@ -40,6 +40,14 @@ contract SafeWallet {
     owner = msg.sender;
     // the user must be specified by the contract creator
     user = _user;
+  }
+
+  function getUser() public view returns(address) {
+    return user;
+  }
+
+  function getOwner() public view returns(address) {
+    return owner;
   }
 
   /// WIP: request for transfer of the given wei amount of funds to the given address
