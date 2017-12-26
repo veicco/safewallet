@@ -13,6 +13,8 @@ contract('SafeWallet', accounts => {
 
   it("transfer to the contract fires an event correctly");
 
+  it("requesting withdrawal is allowed by the user only");
+
   it("requesting withdrawal appends a new pending withdrawal to the list");
 
   it("requesting withdrawal fires an event correctly");
