@@ -1,11 +1,12 @@
 const SafeWallet = artifacts.require("SafeWallet");
 
 contract('SafeWallet', accounts => {
-  it("stores the owner and the user correctly", () => {
-    SafeWallet.deployed(accounts[1], {from: accounts[0]}).then(instance => {
-      assert.equal(instance.owner, accounts[0]);
-      assert.equal(instance.user, accounts[1]);
-    })
+  it("stores the owner and the user correctly", async () => {
+    const instance = await SafeWallet.new(accounts[1], {from: accounts[0]});
+    const user = await instance.getUser.call();
+    const owner = await instance.getOwner.call();
+    assert.equal(user.valueOf(), accounts[1]);
+    assert.equal(owner.valueOf(), accounts[0]);
   });
 
   it("calling kill destroys the contract");
