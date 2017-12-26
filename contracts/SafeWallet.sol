@@ -16,9 +16,6 @@ is stored securely. The owner address is needed only when the contract is
 deployed, when the contract settings are modified, when a request is must be
 cancelled, or when the contract is killed ( in which case the remaining funds are
 transferred to the owner.
-
-Future features:
- - ability for the owner to add trusted withdrawal addresses
 */
 contract SafeWallet {
 
@@ -31,7 +28,7 @@ contract SafeWallet {
   address public owner;
   address public user;
   // requested withdrawals that can be completed when enough time has passed
-  Withdrawal[] private pendingWithdrawals;
+  Withdrawal[] public pendingWithdrawals;
 
   /* Events */
   event WithdrawalRequest(Withdrawal withdrawal);
@@ -46,8 +43,9 @@ contract SafeWallet {
   }
 
   /// WIP: request for transfer of the given wei amount of funds to the given address
-  function requestWithdrawal(address _to, uint _wei_amount) public {
+  function requestWithdrawal(address _to, uint _wei_amount) public returns(bool) {
     pendingWithdrawals.push(Withdrawal(now, _to, _wei_amount));
+    return true;
     // TODO: fire an event
   }
 

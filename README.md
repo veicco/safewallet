@@ -18,6 +18,9 @@ deployed, when the contract settings are modified, when a request is must be
 cancelled, or when the contract is killed ( in which case the remaining funds are
 transferred to the owner.
 
+## Future features:
+ - ability for the owner to add trusted withdrawal addresses
+
 ## Testing
 
 Cheat sheet for private network setup.
