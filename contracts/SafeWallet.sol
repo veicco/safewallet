@@ -63,6 +63,7 @@ contract SafeWallet {
 
   /// WIP: request for transfer of the given wei amount of funds to the given address
   function requestWithdrawal(address _to, uint _wei_amount) public {
+    require(msg.sender == user);
     pendingWithdrawals.push(Withdrawal(now, _to, _wei_amount));
     // TODO: fire an event
   }
