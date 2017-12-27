@@ -32,7 +32,7 @@ contract('SafeWallet', accounts => {
       err = error;
     }
 
-    // check it raises an error
+    // check it raises an exception
     assert.ok(err instanceof Error);
 
     // check the count of pending withdrawals still equals one
@@ -87,7 +87,28 @@ contract('SafeWallet', accounts => {
     assert.equal(log.args.wei_amount, 300);
   });
 
-  it("confirming withdrawal is allowed only by the user");
+  it("confirming withdrawal is allowed only by the user", async () => {
+    const owner = accounts[0];
+    const user = accounts[1];
+    const instance = await SafeWallet.new(user, {from: owner});
+
+    // request a withdrawal
+    await instance.requestWithdrawal(accounts[3], 250, {from: user});
+
+    // try to confirm it as the owner
+    let err = null;
+    try {
+      await instance.confirmWithdrawal(0, {from: owner});
+    } catch (error) {
+      err = error;
+    }
+
+    // check it raises an exception
+    assert.ok(err instanceof Error);
+
+    // confirm it as the user
+    await instance.confirmWithdrawal(0, {from: user});
+  });
 
   it("confirming withdrawal is allowed only when the defined time has passed after the request");
 

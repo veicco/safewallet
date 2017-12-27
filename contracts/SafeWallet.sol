@@ -34,7 +34,7 @@ contract SafeWallet {
 
   /* Events */
   event WithdrawalRequest(address to, uint wei_amount);
-  event WithdrawalComplete(address to, uint wei_amount);
+  event WithdrawalConfirm(address to, uint wei_amount);
 
   /* Methods */
 
@@ -77,7 +77,14 @@ contract SafeWallet {
     WithdrawalRequest(_to, _wei_amount);
   }
 
-  /// complete the pending withdrawals that have passed the waiting period
+  /// confirm a pending withdrawal that has passed the waiting period
+  function confirmWithdrawal(uint _id) public {
+    require(msg.sender == user);
+    require(pendingWithdrawals.length > _id);
+    Withdrawal storage withdrawal = pendingWithdrawals[_id];
+    WithdrawalConfirm(withdrawal.to, withdrawal.wei_amount);
+  }
+
   function completeWithdrawals() public {
     for (uint index = 0; index < pendingWithdrawals.length; index++) {
       // TODO: check if enough time passed
