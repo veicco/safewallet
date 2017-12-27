@@ -78,25 +78,21 @@ contract SafeWallet {
   }
 
   /// confirm a pending withdrawal that has passed the waiting period
-  function confirmWithdrawal(uint _id) public {
+  function confirmWithdrawals() public {
     require(msg.sender == user);
-    require(pendingWithdrawals.length > _id);
-    Withdrawal storage withdrawal = pendingWithdrawals[_id];
-    WithdrawalConfirm(withdrawal.to, withdrawal.wei_amount);
-  }
-
-  function completeWithdrawals() public {
     for (uint index = 0; index < pendingWithdrawals.length; index++) {
       // TODO: check if enough time passed
 
       // execute the transfer
       pendingWithdrawals[index].to.transfer(pendingWithdrawals[index].wei_amount);
 
+      // fire an event
+      WithdrawalConfirm(pendingWithdrawals[index].to, pendingWithdrawals[index].wei_amount);
+
       // remove the Withdrawal from the pendingWithdrawals list
       pendingWithdrawals[index] = pendingWithdrawals[pendingWithdrawals.length - 1];
       pendingWithdrawals.length--;
     }
-    // TODO: fire an event
   }
 
   /// kill the contract and return the remaining funds to the owner

@@ -12,6 +12,8 @@ contract('SafeWallet', accounts => {
 
   it("transfer to the contract fires an event correctly");
 
+  it("requesting withdrawal requires that the contract has enough balance to cover the withdrawal");
+
   it("requesting withdrawal is allowed only by the user", async () => {
     const owner = accounts[0];
     const user = accounts[1];
@@ -87,10 +89,13 @@ contract('SafeWallet', accounts => {
     assert.equal(log.args.wei_amount, 300);
   });
 
-  it("confirming withdrawal is allowed only by the user", async () => {
+  it("confirming withdrawals is allowed only by the user", async () => {
     const owner = accounts[0];
     const user = accounts[1];
     const instance = await SafeWallet.new(user, {from: owner});
+
+    // send ether to the contract
+    await instance.send(web3.toWei(1, "ether"));
 
     // request a withdrawal
     await instance.requestWithdrawal(accounts[3], 250, {from: user});
@@ -98,7 +103,7 @@ contract('SafeWallet', accounts => {
     // try to confirm it as the owner
     let err = null;
     try {
-      await instance.confirmWithdrawal(0, {from: owner});
+      await instance.confirmWithdrawasl({from: owner});
     } catch (error) {
       err = error;
     }
@@ -107,7 +112,7 @@ contract('SafeWallet', accounts => {
     assert.ok(err instanceof Error);
 
     // confirm it as the user
-    await instance.confirmWithdrawal(0, {from: user});
+    await instance.confirmWithdrawals({from: user});
   });
 
   it("confirming withdrawal is allowed only when the defined time has passed after the request");
