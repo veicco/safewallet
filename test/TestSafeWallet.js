@@ -72,11 +72,30 @@ contract('SafeWallet', accounts => {
     assert.equal(pending2[2].valueOf(), 400);
   });
 
-  it("requesting withdrawal fires an event correctly");
+  it("requesting withdrawal fires an event correctly", async () => {
+    const instance = await SafeWallet.new(accounts[1], {from: accounts[0]});
+    const transaction = await instance.requestWithdrawal(accounts[3], 300, {from: accounts[1]});
+
+    const logs = transaction.logs;
+
+    // check the length equals one
+    assert.equal(logs.length, 1);
+
+    const log = logs[0];
+
+    // check the event includes correct data
+    assert.equal(log.event, "WithdrawalRequest");
+    assert.equal(log.args.to, accounts[3]);
+    assert.equal(log.args.wei_amount, 300);
+  });
 
   it("confirming withdrawal removes the underlying withdrawal from the pending withdrawals list");
 
   it("confirming withdrawal fires an event correctly");
+
+  it("rejecting withdrawal removes the underlying withdrawal from the pending withdrawals list");
+
+  it("rejecting withdrawal fires an event correctly");
 
   it("calling kill destroys the contract");
 

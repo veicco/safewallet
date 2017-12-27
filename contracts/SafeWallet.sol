@@ -28,47 +28,56 @@ contract SafeWallet {
   }
   address private owner;
   address private user;
+
   // requested withdrawals that can be completed when enough time has passed
   Withdrawal[] private pendingWithdrawals;
 
   /* Events */
-  event WithdrawalRequest(Withdrawal withdrawal);
-  event WithdrawalComplete(Withdrawal withdrawal, uint timestamp);
+  event WithdrawalRequest(address to, uint wei_amount);
+  event WithdrawalComplete(address to, uint wei_amount);
+
+  /* Methods */
 
   /// construct the contract
   function SafeWallet(address _user) public {
+
     // the contract creator becomes the owner
     owner = msg.sender;
+
     // the user must be specified by the contract creator
     user = _user;
   }
 
+  /// get the user's address
   function getUser() public view returns(address) {
     return user;
   }
 
+  /// get the owner's address
   function getOwner() public view returns(address) {
     return owner;
   }
 
+  /// get contents of a pending withdrawal
   function getPendingWithdrawal(uint _id) public view returns (uint, address, uint) {
     require(pendingWithdrawals.length > _id);
     Withdrawal storage withdrawal = pendingWithdrawals[_id];
     return (withdrawal.timestamp, withdrawal.to, withdrawal.wei_amount);
   }
 
+  /// count of pending withdrawals
   function getPendingWithdrawalsCount() public view returns (uint) {
     return pendingWithdrawals.length;
   }
 
-  /// WIP: request for transfer of the given wei amount of funds to the given address
+  /// request for transfer of the given wei amount of funds to the given address
   function requestWithdrawal(address _to, uint _wei_amount) public {
     require(msg.sender == user);
     pendingWithdrawals.push(Withdrawal(now, _to, _wei_amount));
-    // TODO: fire an event
+    WithdrawalRequest(_to, _wei_amount);
   }
 
-  /// WIP: complete the pending withdrawals that have passed the waiting period
+  /// complete the pending withdrawals that have passed the waiting period
   function completeWithdrawals() public {
     for (uint index = 0; index < pendingWithdrawals.length; index++) {
       // TODO: check if enough time passed
@@ -83,14 +92,14 @@ contract SafeWallet {
     // TODO: fire an event
   }
 
-  /// Kill the contract and return the remaining funds to the owner
+  /// kill the contract and return the remaining funds to the owner
   function kill() public {
     if(msg.sender == owner) {
        selfdestruct(owner);
      }
   }
 
-  /// WIP: deposit funds to the contract
+  /// deposit funds to the contract
   function () public payable {
     // TODO: fire an event
   }
