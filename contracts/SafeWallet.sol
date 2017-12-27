@@ -51,10 +51,19 @@ contract SafeWallet {
     return owner;
   }
 
+  function getPendingWithdrawal(uint _id) public view returns (uint, address, uint) {
+    require(pendingWithdrawals.length > _id);
+    Withdrawal storage withdrawal = pendingWithdrawals[_id];
+    return (withdrawal.timestamp, withdrawal.to, withdrawal.wei_amount);
+  }
+
+  function getPendingWithdrawalsCount() public view returns (uint) {
+    return pendingWithdrawals.length;
+  }
+
   /// WIP: request for transfer of the given wei amount of funds to the given address
-  function requestWithdrawal(address _to, uint _wei_amount) public returns(bool) {
+  function requestWithdrawal(address _to, uint _wei_amount) public {
     pendingWithdrawals.push(Withdrawal(now, _to, _wei_amount));
-    return true;
     // TODO: fire an event
   }
 
