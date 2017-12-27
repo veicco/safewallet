@@ -12,7 +12,7 @@ contract('SafeWallet', accounts => {
 
   it("transfer to the contract fires an event correctly");
 
-  it("requesting withdrawal is allowed by the user only", async () => {
+  it("requesting withdrawal is allowed only by the user", async () => {
     const owner = accounts[0];
     const user = accounts[1];
     const instance = await SafeWallet.new(user, {from: owner});
@@ -76,27 +76,31 @@ contract('SafeWallet', accounts => {
     const instance = await SafeWallet.new(accounts[1], {from: accounts[0]});
     const transaction = await instance.requestWithdrawal(accounts[3], 300, {from: accounts[1]});
 
-    const logs = transaction.logs;
-
     // check the length equals one
+    const logs = transaction.logs;
     assert.equal(logs.length, 1);
 
-    const log = logs[0];
-
     // check the event includes correct data
+    const log = logs[0];
     assert.equal(log.event, "WithdrawalRequest");
     assert.equal(log.args.to, accounts[3]);
     assert.equal(log.args.wei_amount, 300);
   });
 
+  it("confirming withdrawal is allowed only by the user");
+
+  it("confirming withdrawal is allowed only when the defined time has passed after the request");
+
   it("confirming withdrawal removes the underlying withdrawal from the pending withdrawals list");
 
   it("confirming withdrawal fires an event correctly");
+
+  it("rejecting withdrawal is allowed only by the owner");
 
   it("rejecting withdrawal removes the underlying withdrawal from the pending withdrawals list");
 
   it("rejecting withdrawal fires an event correctly");
 
-  it("calling kill destroys the contract");
+  it("calling kill method destroys the contract and returns the remaining funds to the owner");
 
 });
