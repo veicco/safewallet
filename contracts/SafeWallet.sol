@@ -71,9 +71,19 @@ contract SafeWallet {
     return pendingWithdrawals.length;
   }
 
+  /// count of pending withdrawals total value
+  function getPendingWithdrawalsTotalValue() public view returns (uint) {
+    uint sum = 0;
+    for (uint i = 0; i < pendingWithdrawals.length; i++) {
+      sum += pendingWithdrawals[i].wei_amount;
+    }
+    return sum;
+  }
+
   /// request for transfer of the given wei amount of funds to the given address
   function requestWithdrawal(address _to, uint _wei_amount) public {
     require(msg.sender == user);
+    require(int(this.balance) - int(getPendingWithdrawalsTotalValue()) - int(_wei_amount) >= 0);
     pendingWithdrawals.push(Withdrawal(now, _to, _wei_amount));
     WithdrawalRequest(_to, _wei_amount);
   }

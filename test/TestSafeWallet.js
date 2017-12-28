@@ -40,28 +40,48 @@ contract('SafeWallet', accounts => {
 
   });
 
+  describe('getPendingWithdrawalsTotalValue()', () => {
+
+    // create an initial instance and send 1 ether to the contract
+    let instance;
+    before(async () => {
+      instance = await SafeWallet.new(testUser, {from: testOwner});
+      instance.sendTransaction({from: alpha, value: web3.toWei(1, "ether")});
+    });
+
+    it('getPendingWithdrawalsTotalValue returns correct value', async () => {
+
+      // initial sum should be zero
+      let sum = await instance.getPendingWithdrawalsTotalValue.call();
+      assert.equal(sum.toNumber(), 0);
+
+      // requesting one ether should cause the sum to be one ether
+      await instance.requestWithdrawal(alpha, web3.toWei(1, "ether"), {from: testUser});
+      sum = await instance.getPendingWithdrawalsTotalValue.call();
+      assert.equal(web3.fromWei(sum, "ether").toNumber(), 1);
+
+    });
+
+  });
+
   describe('requestWithdrawal()', () => {
 
-    it("requesting withdrawal requires that the contract has enough balance to cover the withdrawal"), async () => {
+    // create an initial instance and send 10 ether to the contract
+    let instance;
+    before(async () => {
+      instance = await SafeWallet.new(testUser, {from: testOwner});
+      instance.sendTransaction({from: alpha, value: web3.toWei(10, "ether")});
+    });
 
-    };
+    it("requesting withdrawal requires that the contract has enough balance to cover the withdrawal", async () => {
 
-    it("requesting withdrawal is allowed only by the user", async () => {
-      const owner = testOwner;
-      const user = testUser;
-      const instance = await SafeWallet.new(user, {from: owner});
+      // request 0.1 ether (should succeed)
+      await instance.requestWithdrawal(alpha, web3.toWei(0.1, "ether"), {from: testUser});
 
-      // request a withdrawal as the user
-      await instance.requestWithdrawal(alpha, 100, {from: user});
-
-      // check the count of pending withdrawals equals one
-      let count = await instance.getPendingWithdrawalsCount.call();
-      assert.equal(count, 1);
-
-      // request a withdrawal as the owner
+      // request another 10 ether (should fail)
       let err = null;
       try {
-        await instance.requestWithdrawal(alpha, 100, {from: owner});
+        await instance.requestWithdrawal(alpha, web3.toWei(10, "ether"), {from: testUser});
       } catch (error) {
         err = error;
       }
@@ -69,46 +89,71 @@ contract('SafeWallet', accounts => {
       // check it raises an exception
       assert.ok(err instanceof Error);
 
-      // check the count of pending withdrawals still equals one
-      count = await instance.getPendingWithdrawalsCount.call();
-      assert.equal(count, 1);
+    });
+
+    it("requesting withdrawal is allowed only by the user", async () => {
+
+      // store the sum of pending withdrawals at the beginning
+      const sum = await instance.getPendingWithdrawalsTotalValue.call();
+
+      // request a withdrawal as the user (should succeed)
+      await instance.requestWithdrawal(alpha, web3.toWei(0.1, "ether"), {from: testUser});
+
+      // request a withdrawal as the owner (should fail)
+      let err = null;
+      try {
+        await instance.requestWithdrawal(alpha, web3.toWei(0.1, "ether"), {from: testOwner});
+      } catch (error) {
+        err = error;
+      }
+
+      // check it raises an exception
+      assert.ok(err instanceof Error);
+
+      // check that the sum has increased by 0.1 ethers
+      const finalSum = await instance.getPendingWithdrawalsTotalValue.call();
+      assert.equal(web3.fromWei(finalSum - sum, "ether").valueOf(), 0.1);
+
     });
 
     it("requesting a withdrawal appends it to the pending withdrawals list", async () => {
-      const instance = await SafeWallet.new(testUser, {from: testOwner});
+
+      // store the initial count of pending withdrawals
+      const count1 = await instance.getPendingWithdrawalsCount.call();
 
       // request a withdrawal
-      await instance.requestWithdrawal(alpha, 100, {from: testUser});
+      await instance.requestWithdrawal(alpha, web3.toWei(0.1, "ether"), {from: testUser});
 
       // check the count of pending withdrawals
-      let count = await instance.getPendingWithdrawalsCount.call();
-      assert.equal(count, 1);
+      const count2 = await instance.getPendingWithdrawalsCount.call();
+      assert.equal(count2.valueOf()-count1.valueOf(), 1);
 
       // check the content of the requested withdrawal
-      let pending = await instance.getPendingWithdrawal.call(0);
-      assert.equal(pending[1].valueOf(), alpha);
-      assert.equal(pending[2].valueOf(), 100);
+      let len = await instance.getPendingWithdrawalsCount.call();
+      let pending1 = await instance.getPendingWithdrawal.call(len.valueOf() - 1);
+      assert.equal(pending1[1].valueOf(), alpha);
+      assert.equal(web3.fromWei(pending1[2], "ether").valueOf(), 0.1);
 
       // request additional two withdrawals
-      await instance.requestWithdrawal(beta, 300, {from: testUser});
-      await instance.requestWithdrawal(gamma, 400, {from: testUser});
+      await instance.requestWithdrawal(beta, web3.toWei(0.3, "ether"), {from: testUser});
+      await instance.requestWithdrawal(gamma, web3.toWei(0.4, "ether"), {from: testUser});
 
       // check the new count of pending withdrawals
-      count = await instance.getPendingWithdrawalsCount.call();
-      assert.equal(count, 3);
+      const count3 = await instance.getPendingWithdrawalsCount.call();
+      assert.equal(count3.valueOf() - count2.valueOf(), 2);
 
       // check the content of the new requested withdrawals
-      let pending1 = await instance.getPendingWithdrawal.call(1);
-      let pending2 = await instance.getPendingWithdrawal.call(2);
-      assert.equal(pending1[1].valueOf(), beta);
-      assert.equal(pending1[2].valueOf(), 300);
-      assert.equal(pending2[1].valueOf(), gamma);
-      assert.equal(pending2[2].valueOf(), 400);
+      len = await instance.getPendingWithdrawalsCount.call();
+      let pending2 = await instance.getPendingWithdrawal.call(len.valueOf() - 2);
+      let pending3 = await instance.getPendingWithdrawal.call(len.valueOf() - 1);
+      assert.equal(pending2[1].valueOf(), beta);
+      assert.equal(web3.fromWei(pending2[2], "ether").valueOf(), 0.3);
+      assert.equal(pending3[1].valueOf(), gamma);
+      assert.equal(web3.fromWei(pending3[2], "ether").valueOf(), 0.4);
     });
 
     it("requesting withdrawal fires an event correctly", async () => {
-      const instance = await SafeWallet.new(testUser, {from: testOwner});
-      const transaction = await instance.requestWithdrawal(beta, 300, {from: testUser});
+      const transaction = await instance.requestWithdrawal(beta, web3.toWei(0.3, "ether"), {from: testUser});
 
       // check the length equals one
       const logs = transaction.logs;
@@ -118,7 +163,7 @@ contract('SafeWallet', accounts => {
       const log = logs[0];
       assert.equal(log.event, "WithdrawalRequest");
       assert.equal(log.args.to, beta);
-      assert.equal(log.args.wei_amount, 300);
+      assert.equal(web3.fromWei(log.args.wei_amount, "ether"), 0.3);
     });
 
   });
