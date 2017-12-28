@@ -2,16 +2,23 @@ const SafeWallet = artifacts.require("SafeWallet");
 
 contract('SafeWallet', accounts => {
 
-  it("the owner and the user are stored correctly", async () => {
-    const instance = await SafeWallet.new(accounts[1], {from: accounts[0]});
-    const user = await instance.getUser.call();
-    const owner = await instance.getOwner.call();
-    assert.equal(user.valueOf(), accounts[1]);
-    assert.equal(owner.valueOf(), accounts[0]);
+  describe('constructor', () => {
+
+    it("the owner and the user are stored correctly", async () => {
+      const instance = await SafeWallet.new(accounts[1], {from: accounts[0]});
+      const user = await instance.getUser.call();
+      const owner = await instance.getOwner.call();
+      assert.equal(user.valueOf(), accounts[1]);
+      assert.equal(owner.valueOf(), accounts[0]);
+    });
+
   });
 
-  it("transfer to the contract fires an event correctly");
+  describe('deposit', () => {
 
+    it("transfer to the contract fires an event correctly");
+
+  });
 
   describe('requestWithdrawal()', () => {
 
