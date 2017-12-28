@@ -170,30 +170,41 @@ contract('SafeWallet', accounts => {
 
   describe('confirmWithdrawals()', () => {
 
-    it("confirming withdrawals is allowed only by the user", async () => {
-      const owner = testOwner;
-      const user = testUser;
-      const instance = await SafeWallet.new(user, {from: owner});
+    // create an initial instance and send 10 ether to the contract
+    let instance;
+    before(async () => {
+      instance = await SafeWallet.new(testUser, {from: testOwner});
+      await instance.sendTransaction({from: alpha, value: web3.toWei(10, "ether")});
+    });
 
-      // send ether to the contract
-      await instance.send(web3.toWei(1, "ether"));
+    it("confirming withdrawals is allowed only by the user", async () => {
 
       // request a withdrawal
-      await instance.requestWithdrawal(beta, 250, {from: user});
+      await instance.requestWithdrawal(beta, web3.toWei(0.1, "ether"), {from: testUser});
 
-      // try to confirm it as the owner
+      // try to confirm withdrawals as the owner (should fail)
       let err = null;
       try {
-        await instance.confirmWithdrawasl({from: owner});
+        await instance.confirmWithdrawasl({from: testOwner});
       } catch (error) {
         err = error;
       }
-
       // check it raises an exception
       assert.ok(err instanceof Error);
 
-      // confirm it as the user (should not raise exceptions)
-      await instance.confirmWithdrawals({from: user});
+      // try to confirm withdrawals as an external user (should fail)
+      err = null;
+      try {
+        await instance.confirmWithdrawasl({from: alpha});
+      } catch (error) {
+        err = error;
+      }
+      // check it raises an exception
+      assert.ok(err instanceof Error);
+
+
+      // try to confirm it as the user (should succeed)
+      await instance.confirmWithdrawals({from: testUser});
     });
 
     it("confirming withdrawal is allowed only when the defined time has passed after the request");
