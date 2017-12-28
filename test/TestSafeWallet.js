@@ -209,11 +209,11 @@ contract('SafeWallet', accounts => {
 
     it("confirming withdrawal is allowed only when the defined time has passed after the request");
 
-    it("confirming withdrawal removes the underlying withdrawal from the pending withdrawals list");
+    it("confirming withdrawals removes the confirmed withdrawals from the pending withdrawals list");
 
-    it("confirming withdrawal transfers the funds correctly");
+    it("confirming withdrawals transfers the funds correctly");
 
-    it("confirming withdrawal fires an event correctly");
+    it("confirming withdrawals fires events correctly");
 
   });
 
@@ -224,6 +224,10 @@ contract('SafeWallet', accounts => {
     it("rejecting withdrawal removes the underlying withdrawal from the pending withdrawals list");
 
     it("rejecting withdrawal fires an event correctly");
+
+  });
+
+  describe('kill()', () => {
 
     it("calling kill method destroys the contract and returns the remaining funds to the owner");
 

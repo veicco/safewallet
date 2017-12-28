@@ -46,3 +46,4 @@ truffle(develop)> test
 
 ## Future features:
  - ability for the owner to add trusted withdrawal addresses
+ - support for multiple users (shared wallet)
