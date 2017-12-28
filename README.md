@@ -19,6 +19,10 @@ are modified, when a request must be cancelled, or when the contract is killed
 (in which case the remaining funds are transferred to the owner. These special
 transactions can be generated offline to ensure security.
 
+## Deployment
+
+TODO
+
 ## Testing
 
 This project uses [Truffle framework](http://truffleframework.com/) which 

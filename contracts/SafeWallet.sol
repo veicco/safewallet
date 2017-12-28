@@ -33,6 +33,7 @@ contract SafeWallet {
   Withdrawal[] private pendingWithdrawals;
 
   /* Events */
+  event Deposit(address from, uint wei_amount);
   event WithdrawalRequest(address to, uint wei_amount);
   event WithdrawalConfirm(address to, uint wei_amount);
 
@@ -104,7 +105,7 @@ contract SafeWallet {
 
   /// deposit funds to the contract
   function () public payable {
-    // TODO: fire an event
+    Deposit(msg.sender, msg.value);
   }
 
 }
