@@ -19,21 +19,26 @@ are modified, when a request must be cancelled, or when the contract is killed
 (in which case the remaining funds are transferred to the owner. These special
 transactions can be generated offline to ensure security.
 
-## Future features:
- - ability for the owner to add trusted withdrawal addresses
-
 ## Testing
 
-Cheat sheet for private network setup.
+This project uses [Truffle framework](http://truffleframework.com/) which 
+provides Mocha + Chai libraries for testing solidity contracts through 
+[web3.js](https://github.com/ethereum/web3.js/) interface.
 
+Install Truffle:
 ```
-geth --datadir ./privatechain/chaindata/ init ./genesis.json
-```
+npm install -g truffle
+``` 
 
+Start Truffle development engine:
 ```
-geth --datadir ./privatechain/chaindata/ console
-```
+truffle development
+``` 
 
+Run unit tests:
 ```
-/Applications/Mist.app/Contents/MacOS/Mist --rpc ./privatechain/chaindata/geth.ipc
-```
+truffle(develop)> test
+``` 
+
+## Future features:
+ - ability for the owner to add trusted withdrawal addresses
