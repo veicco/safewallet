@@ -1,0 +1,26 @@
+{
+  "name": "safewallet",
+  "version": "1.0.0",
+  "description": "Wallet contract for Ethereum with additional security features",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "truffle test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KovaVeikko/safewallet.git"
+  },
+  "author": "Veikko Kovanen",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/KovaVeikko/safewallet/issues"
+  },
+  "homepage": "https://github.com/KovaVeikko/safewallet#readme",
+  "dependencies": {},
+  "devDependencies": {
+    "sinon": "^4.1.3"
+  }
+}
