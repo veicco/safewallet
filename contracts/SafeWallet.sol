@@ -28,6 +28,7 @@ contract SafeWallet {
   }
   address private owner;
   address private user;
+  uint private confirmTime; // time in milliseconds
 
   // requested withdrawals that can be completed when enough time has passed
   Withdrawal[] private pendingWithdrawals;
@@ -47,6 +48,9 @@ contract SafeWallet {
 
     // the user must be specified by the contract creator
     user = _user;
+
+    // set the default value for confirmTime
+    confirmTime = 1000;
   }
 
   /// get the user's address
@@ -91,18 +95,22 @@ contract SafeWallet {
   /// confirm a pending withdrawal that has passed the waiting period
   function confirmWithdrawals() public {
     require(msg.sender == user);
+
     for (uint index = 0; index < pendingWithdrawals.length; index++) {
-      // TODO: check if enough time passed
 
-      // execute the transfer
-      pendingWithdrawals[index].to.transfer(pendingWithdrawals[index].wei_amount);
+      // check if enough time passed
+      if (now - pendingWithdrawals[index].timestamp >= confirmTime) {
 
-      // fire an event
-      WithdrawalConfirm(pendingWithdrawals[index].to, pendingWithdrawals[index].wei_amount);
+        // execute the transfer
+        pendingWithdrawals[index].to.transfer(pendingWithdrawals[index].wei_amount);
 
-      // remove the Withdrawal from the pendingWithdrawals list
-      pendingWithdrawals[index] = pendingWithdrawals[pendingWithdrawals.length - 1];
-      pendingWithdrawals.length--;
+        // fire an event
+        WithdrawalConfirm(pendingWithdrawals[index].to, pendingWithdrawals[index].wei_amount);
+
+        // remove the Withdrawal from the pendingWithdrawals list
+        pendingWithdrawals[index] = pendingWithdrawals[pendingWithdrawals.length - 1];
+        pendingWithdrawals.length--;
+      }
     }
   }
 

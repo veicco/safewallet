@@ -1,4 +1,5 @@
 const SafeWallet = artifacts.require("SafeWallet");
+const sinon = require('sinon');
 
 contract('SafeWallet', accounts => {
 
@@ -170,11 +171,33 @@ contract('SafeWallet', accounts => {
 
   describe('confirmWithdrawals()', () => {
 
-    // create an initial instance and send 10 ether to the contract
     let instance;
+    let clock;
+
     before(async () => {
       instance = await SafeWallet.new(testUser, {from: testOwner});
+
+      // send 10 ether to the contract
       await instance.sendTransaction({from: alpha, value: web3.toWei(10, "ether")});
+    });
+
+    beforeEach(() => {
+      clock = sinon.useFakeTimers();
+    });
+
+    afterEach(() => {
+      clock.restore();
+    });
+
+    it("should time out after 500 ms", function() {
+      let timedOut = false;
+      setTimeout(function () {
+        timedOut = true;
+      }, 5000);
+
+      assert.equal(timedOut, false);
+      clock.tick(5100);
+      assert.equal(timedOut, true);
     });
 
     it("confirming withdrawals is allowed only by the user", async () => {
@@ -185,7 +208,7 @@ contract('SafeWallet', accounts => {
       // try to confirm withdrawals as the owner (should fail)
       let err = null;
       try {
-        await instance.confirmWithdrawasl({from: testOwner});
+        await instance.confirmWithdrawals({from: testOwner});
       } catch (error) {
         err = error;
       }
@@ -207,7 +230,35 @@ contract('SafeWallet', accounts => {
       await instance.confirmWithdrawals({from: testUser});
     });
 
-    it("confirming withdrawal is allowed only when the defined time has passed after the request");
+    it("confirming withdrawal succeeds only when the defined time has passed after the request", async () => {
+
+      // create a new instance
+      const i = await SafeWallet.new(testUser, {from: testOwner});
+      await i.sendTransaction({from: testUser, value: web3.toWei(10, "ether")});
+
+      // request a withdrawal
+      await i.requestWithdrawal(beta, web3.toWei(0.1, "ether"), {from: testUser});
+
+      // check the count of withdrawals
+      let count = await i.getPendingWithdrawalsCount.call();
+      assert.equal(count.toNumber(), 1);
+
+      // confirm withdrawals before required time has passed
+      await i.confirmWithdrawals({from: testUser});
+
+      // check it is still unconfirmed
+      count = await i.getPendingWithdrawalsCount.call();
+      assert.equal(count.toNumber(), 1);
+
+      // confirm withdrawals after required time has passed
+      setTimeout(() => {
+        //i.confirmWithdrawals({from: testUser}); TODO: raises exception for unknown reason
+        assert.equal(false, true);
+      }, 1500);
+
+      clock.tick(2000);
+
+    });
 
     it("confirming withdrawals removes the confirmed withdrawals from the pending withdrawals list");
 
