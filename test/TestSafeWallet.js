@@ -251,12 +251,13 @@ contract('SafeWallet', accounts => {
       assert.equal(count.toNumber(), 1);
 
       // confirm withdrawals after required time has passed
-      setTimeout(() => {
-        //i.confirmWithdrawals({from: testUser}); TODO: raises exception for unknown reason
-        assert.equal(false, true);
+      setTimeout(async () => {
+        await i.confirmWithdrawals({from: testUser});
+        count = await i.getPendingWithdrawalsCount.call();
+        assert.equal(count.toNumber(), 0);
       }, 1500);
 
-      clock.tick(2000);
+      clock.tick(1500);
 
     });
 
