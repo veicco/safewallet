@@ -136,9 +136,9 @@ contract SafeWallet {
 
   /// kill the contract and return the remaining funds to the owner
   function kill() public {
-    if(msg.sender == owner) {
-       selfdestruct(owner);
-     }
+    require(msg.sender == owner);
+    selfdestruct(owner);
+
   }
 
   /// deposit funds to the contract

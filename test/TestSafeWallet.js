@@ -21,7 +21,7 @@ contract('SafeWallet', accounts => {
 
   const getBalance = (address) => web3.fromWei(web3.eth.getBalance(address), "ether");
 
-  describe('constructor', () => {
+  describe('Constructor()', () => {
 
     it("the owner and the user are stored correctly", async () => {
       const instance = await SafeWallet.new(testUser, {from: testOwner});
@@ -33,7 +33,7 @@ contract('SafeWallet', accounts => {
 
   });
 
-  describe('deposit', () => {
+  describe('Deposit()', () => {
 
     it("transfer to the contract fires an event correctly", async () => {
       const instance = await SafeWallet.new(testUser, {from: testOwner});
@@ -334,7 +334,50 @@ contract('SafeWallet', accounts => {
 
   describe('kill()', () => {
 
-    it("calling kill method destroys the contract and returns the remaining funds to the owner");
+    // create an initial instance, send 10 ether to the contract, and request withdrawals
+    let instance;
+    let deposit;
+
+    before(async () => {
+      instance = await SafeWallet.new(testUser, {from: testOwner});
+      deposit = await instance.sendTransaction({from: alpha, value: web3.toWei(10, "ether")});
+      await instance.requestWithdrawal(beta, web3.toWei(1, "ether"), {from: testUser});
+      await instance.requestWithdrawal(gamma, web3.toWei(1, "ether"), {from: testUser});
+    });
+
+    it("kill is allowed only by the owner", async () => {
+
+      // try to kill the contract as an external account
+      let err = null;
+      try {
+        await instance.kill({from: beta});
+      } catch (error) {
+        err = error;
+      }
+      // check it raises an exception
+      assert.ok(err instanceof Error);
+
+      // try to kill the contract as the user
+      try {
+        await instance.kill({from: testUser});
+      } catch (error) {
+        err = error;
+      }
+      // check it raises an exception
+      assert.ok(err instanceof Error);
+
+    });
+
+    it("kill destroys the contract and returns the remaining funds to the owner", async () => {
+
+      // kill the contract as the owner
+      await instance.kill({from: testOwner});
+
+      // check the balances
+      assert.equal(getBalance(instance.address), 0);
+      assert.ok(getBalance(testOwner) > 109);
+
+    });
 
   });
 
