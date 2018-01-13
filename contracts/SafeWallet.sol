@@ -92,7 +92,7 @@ contract SafeWallet {
     WithdrawalRequest(_to, _wei_amount);
   }
 
-  /// confirm a pending withdrawal that has passed the waiting period
+  /// confirm all pending withdrawals that has passed the waiting period
   function confirmWithdrawals() public {
     require(msg.sender == user);
 
@@ -100,7 +100,6 @@ contract SafeWallet {
 
       // check if enough time passed
       if (now - pendingWithdrawals[index].timestamp >= confirmTime) {
-
         // execute the transfer
         pendingWithdrawals[index].to.transfer(pendingWithdrawals[index].wei_amount);
 

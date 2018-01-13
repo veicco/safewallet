@@ -20,7 +20,5 @@
   },
   "homepage": "https://github.com/KovaVeikko/safewallet#readme",
   "dependencies": {},
-  "devDependencies": {
-    "sinon": "^4.1.3"
-  }
+  "devDependencies": {}
 }
