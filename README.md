@@ -2,15 +2,28 @@
 # Safe Wallet
 
 ## About
-A wallet contract which is intended to be more secure than pure address wallets.
+Safe wallet is a smart contract running on the Ethereum blockchain. It is
+a wallet for ERC20 tokens, allowing cancellation of withdrawals from the 
+contract. 
 
-The contract has two different user roles: 1) the owner, and 2) the user.
-Only the user is allowed to request withdrawals from the contract. In case
-a withdrawal is requested, the contract fires an event, allowing a client
-program to send a notification to the owner's email address. Within a specified
-waiting period, the owner can cancel the withdrawal and freeze the wallet, for
-example if the requested withdrawal was made by a hacker.
+### Owner
+The contract creator becomes the owner of the wallet, having rights to 
+cancel withdrawals, modify preferences, add users, and kill the contract.
 
+### Users 
+Users are addresses added to the contract by the owner. They have right to 
+request withdrawals from the contract. When the specified waiting period 
+after a withdrawal request has passed, if the owner has not cancelled the 
+withdrawal, the user can complete the withdrawal.
+
+### Events
+An event is fired on each deposit to the contract, withdrawal request from
+the contract, and cancellation of a withdrawal. By listening the withdrawal
+events (by means of a client application), the user can react to possible
+unintended withdrawals by canceling them and locking the wallet.
+
+
+### Why?
 The idea is that one do not have to worry about keeping the private key file of
 the user account in devices that are connected to the Internet, as long as the
 owner address is stored securely. The owner address/account is however needed
@@ -36,16 +49,11 @@ Install Truffle:
 npm install -g truffle
 ``` 
 
-Start Truffle development engine:
-```
-truffle development
-``` 
-
 Run unit tests:
 ```
-truffle(develop)> test
+truffle test
 ``` 
 
 ## Future features:
- - ability for the owner to add trusted withdrawal addresses
+ - ability to limit withdrawals to trusted addresses that are managed by the owner
  - support for multiple users (shared wallet)
