@@ -3,7 +3,7 @@
 
 ## About
 Safe wallet is a smart contract running on the Ethereum blockchain. It is
-a wallet for ERC20 tokens, allowing cancellation of withdrawals from the 
+a wallet for ETH and ERC20 tokens, allowing cancellation of withdrawals from the 
 contract. 
 
 ### Owner
@@ -33,6 +33,10 @@ are modified, when a request must be cancelled, or when the contract is killed
 transactions can be generated offline to ensure security.
 
 ![Safe Wallet diagram](diagram.png)
+
+## Methods
+
+TODO
 
 ## Deployment
 
