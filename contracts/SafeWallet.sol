@@ -22,9 +22,10 @@ contract SafeWallet {
 
   /* Data */
   struct Withdrawal {
-     uint timestamp;
-     address to;
-     uint wei_amount;
+    uint id;
+    uint timestamp;
+    address to;
+    uint wei_amount;
   }
   address private owner;
   address private user;
@@ -90,6 +91,11 @@ contract SafeWallet {
     require(int(this.balance) - int(getPendingWithdrawalsTotalValue()) - int(_wei_amount) >= 0);
     pendingWithdrawals.push(Withdrawal(now, _to, _wei_amount));
     WithdrawalRequest(_to, _wei_amount);
+  }
+
+  /// confirm a withdrawal with the given id
+  function confirmWithdrawal(_id) public {
+    require(msg.sender == user);
   }
 
   /// confirm all pending withdrawals that has passed the waiting period
