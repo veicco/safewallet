@@ -22,22 +22,25 @@ contract SafeWallet {
 
   /* Data */
   struct Withdrawal {
-    uint id;
-    uint timestamp;
+    uint created_at;
     address to;
     uint wei_amount;
+    uint status; // 0 = pending, 1 = completed, 2 = rejected
   }
+  mapping(uint => Withdrawal) private withdrawals;
+
+  /* Settings */
   address private owner;
   address private user;
   uint private confirmTime; // time in milliseconds
 
-  // requested withdrawals that can be completed when enough time has passed
-  Withdrawal[] private pendingWithdrawals;
+  /* Internal variables */
+  uint private withdrawalCount = 0;
 
   /* Events */
   event Deposit(address from, uint wei_amount);
-  event WithdrawalRequest(address to, uint wei_amount);
-  event WithdrawalConfirm(address to, uint wei_amount);
+  event WithdrawalRequest(uint id, address to, uint wei_amount);
+  event WithdrawalConfirm(uint id, address to, uint wei_amount);
 
   /* Methods */
 
@@ -64,59 +67,52 @@ contract SafeWallet {
     return owner;
   }
 
+  /// get the total count of requested withdrawals
+  function getWithdrawalCount() public view returns(uint) {
+    return withdrawalCount;
+  }
+
   /// get contents of a pending withdrawal
-  function getPendingWithdrawal(uint _id) public view returns (uint, address, uint) {
-    require(pendingWithdrawals.length > _id);
-    Withdrawal storage withdrawal = pendingWithdrawals[_id];
-    return (withdrawal.timestamp, withdrawal.to, withdrawal.wei_amount);
-  }
-
-  /// count of pending withdrawals
-  function getPendingWithdrawalsCount() public view returns (uint) {
-    return pendingWithdrawals.length;
-  }
-
-  /// count of pending withdrawals total value
-  function getPendingWithdrawalsTotalValue() public view returns (uint) {
-    uint sum = 0;
-    for (uint i = 0; i < pendingWithdrawals.length; i++) {
-      sum += pendingWithdrawals[i].wei_amount;
-    }
-    return sum;
+  function getWithdrawal(uint _id) public view returns (uint, address, uint, uint) {
+    require(_id < withdrawalCount);
+    Withdrawal storage withdrawal = withdrawals[_id];
+    return (withdrawal.created_at, withdrawal.to, withdrawal.wei_amount, withdrawal.status);
   }
 
   /// request for transfer of the given wei amount of funds to the given address
   function requestWithdrawal(address _to, uint _wei_amount) public {
     require(msg.sender == user);
-    require(int(this.balance) - int(getPendingWithdrawalsTotalValue()) - int(_wei_amount) >= 0);
-    pendingWithdrawals.push(Withdrawal(now, _to, _wei_amount));
-    WithdrawalRequest(_to, _wei_amount);
+    withdrawals[withdrawalCount] = Withdrawal(now, _to, _wei_amount, 0);
+    WithdrawalRequest(withdrawalCount, _to, _wei_amount);
+    withdrawalCount += 1;
   }
 
   /// confirm a withdrawal with the given id
-  function confirmWithdrawal(_id) public {
-    require(msg.sender == user);
-  }
-
-  /// confirm all pending withdrawals that has passed the waiting period
-  function confirmWithdrawals() public {
+  function confirmWithdrawal(uint _id) public {
     require(msg.sender == user);
 
-    for (uint index = 0; index < pendingWithdrawals.length; index++) {
+    // require the withdrawal exists
+    require(_id < withdrawalCount);
 
-      // check if enough time passed
-      if (now - pendingWithdrawals[index].timestamp >= confirmTime) {
-        // execute the transfer
-        pendingWithdrawals[index].to.transfer(pendingWithdrawals[index].wei_amount);
+    Withdrawal storage withdrawal = withdrawals[_id];
 
-        // fire an event
-        WithdrawalConfirm(pendingWithdrawals[index].to, pendingWithdrawals[index].wei_amount);
+    // require the status is pending
+    require(withdrawal.status == 0);
 
-        // remove the Withdrawal from the pendingWithdrawals list
-        pendingWithdrawals[index] = pendingWithdrawals[pendingWithdrawals.length - 1];
-        pendingWithdrawals.length--;
-      }
-    }
+    // require enough time has passed
+    require(now - withdrawal.created_at >= confirmTime);
+
+    // require the balance is enough
+    require(withdrawal.wei_amount <= this.balance);
+
+    // execute the transfer
+    withdrawal.to.transfer(withdrawal.wei_amount);
+
+    // change status of the withdrawal to completed
+    withdrawal.status = 1;
+
+    // fire an event
+    WithdrawalConfirm(_id, withdrawal.to, withdrawal.wei_amount);
   }
 
   /// kill the contract and return the remaining funds to the owner
