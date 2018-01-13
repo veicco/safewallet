@@ -140,7 +140,7 @@ contract('SafeWallet', accounts => {
 
   describe('confirmWithdrawal', () => {
 
-    // create an initial instance, send 10 ether to the contract, and request a withdrawal
+    // create an initial instance, send 10 ether to the contract, and request a few withdrawals
     let instance;
     let deposit;
 
@@ -155,7 +155,7 @@ contract('SafeWallet', accounts => {
       // request two small withdrawals
       await instance.requestWithdrawal(beta, web3.toWei(1, "ether"), {from: testUser});
       await instance.requestWithdrawal(gamma, web3.toWei(1, "ether"), {from: testUser});
-      // request a large request
+      // request a large withdrawal
       await instance.requestWithdrawal(gamma, web3.toWei(100, "ether"), {from: testUser});
     });
 
@@ -249,15 +249,86 @@ contract('SafeWallet', accounts => {
 
   });
 
-  describe('rejectWithdrawal()', () => {
+  describe('cancelWithdrawal()', () => {
 
-    it("rejecting withdrawal is allowed only by the owner");
+    // create an initial instance, send 10 ether to the contract, and request withdrawals
+    let instance;
+    let deposit;
+    let cancellation;
 
-    it("rejecting withdrawal removes the underlying withdrawal from the pending withdrawals list");
+    before(async () => {
+      instance = await SafeWallet.new(testUser, {from: testOwner});
+      deposit = await instance.sendTransaction({from: alpha, value: web3.toWei(10, "ether")});
+      await instance.requestWithdrawal(beta, web3.toWei(1, "ether"), {from: testUser});
+      await instance.requestWithdrawal(gamma, web3.toWei(1, "ether"), {from: testUser});
+    });
 
-    it("rejecting withdrawal does not change balances");
+    const cancel = async (id, from, jumpTime) => {
+      increaseTime(jumpTime);
+      return await instance.cancelWithdrawal(id, {from: from});
+    };
 
-    it("rejecting withdrawal fires an event correctly");
+    it("cancelling withdrawal is allowed only by the owner and by the user", async () => {
+
+      // try to cancel the first withdrawal as an external account (should fail)
+      let err = null;
+      try {
+        await cancel(0, alpha, 100);
+      } catch (error) {
+        err = error;
+      }
+      // check it raises an exception
+      assert.ok(err instanceof Error);
+    });
+
+    it("cancelling withdrawal changes the withdrawal status to 2 (cancelled)", async () => {
+
+      // cancel the first withdrawal as the user (should succeed)
+      cancellation = await cancel(0, testUser, 100);
+
+      // check the status
+      const withdrawal0 = await instance.getWithdrawal.call(0);
+      assert.equal(withdrawal0[3], 2);
+
+      // check the event
+
+
+      // cancel the second withdrawal as the owner (should succeed)
+      await cancel(1, testOwner, 100);
+
+      // check the status
+      const withdrawal1 = await instance.getWithdrawal.call(1);
+      assert.equal(withdrawal1[3], 2);
+
+    });
+
+    it("cancelling withdrawal fires an event correctly", () => {
+      // check the logs length equals one
+      const logs = cancellation.logs;
+      assert.equal(logs.length, 1);
+
+      // check the event includes correct data
+      const log = logs[0];
+      assert.equal(log.event, "WithdrawalCancel");
+      assert.equal(log.args.id, 0);
+      assert.equal(log.args.to, beta);
+      assert.equal(web3.fromWei(log.args.wei_amount, "ether"), 1);
+    });
+
+
+    it("cancelling withdrawal fails if the status is not 0 (pending)", async () => {
+
+      // try to cancel the first withdrawal second time (should fail)
+      let err = null;
+      try {
+        await cancel(0, testUser, 100);
+      } catch (error) {
+        err = error;
+      }
+      // check it raises an exception
+      assert.ok(err instanceof Error);
+
+    });
 
   });
 

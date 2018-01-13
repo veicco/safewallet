@@ -25,7 +25,7 @@ contract SafeWallet {
     uint created_at;
     address to;
     uint wei_amount;
-    uint status; // 0 = pending, 1 = completed, 2 = rejected
+    uint status; // 0 = pending, 1 = completed, 2 = cancelled
   }
   mapping(uint => Withdrawal) private withdrawals;
 
@@ -41,6 +41,7 @@ contract SafeWallet {
   event Deposit(address from, uint wei_amount);
   event WithdrawalRequest(uint id, address to, uint wei_amount);
   event WithdrawalConfirm(uint id, address to, uint wei_amount);
+  event WithdrawalCancel(uint id, address to, uint wei_amount);
 
   /* Methods */
 
@@ -113,6 +114,24 @@ contract SafeWallet {
 
     // fire an event
     WithdrawalConfirm(_id, withdrawal.to, withdrawal.wei_amount);
+  }
+
+  function cancelWithdrawal(uint _id) public {
+    require(msg.sender == owner || msg.sender == user);
+
+    // require the withdrawal exists
+    require(_id < withdrawalCount);
+
+    Withdrawal storage withdrawal = withdrawals[_id];
+
+    // require the withdrawal is pending
+    require(withdrawal.status == 0);
+
+    // change status of the withdrawal to cancelled
+    withdrawal.status = 2;
+
+    // fire an event
+    WithdrawalCancel(_id, withdrawal.to, withdrawal.wei_amount);
   }
 
   /// kill the contract and return the remaining funds to the owner
