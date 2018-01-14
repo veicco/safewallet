@@ -1,7 +1,7 @@
 {
   "name": "safewallet",
   "version": "1.0.0",
-  "description": "Wallet contract for Ethereum with additional security features",
+  "description": "A wallet contract for Ethereum with additional security features",
   "main": "truffle-config.js",
   "directories": {
     "test": "test"
