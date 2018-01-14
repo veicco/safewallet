@@ -18,7 +18,11 @@ withdrawal and remove rights from the stolen account to interact with the wallet
 ### Permissions
 
 #### Owner
-The contract creator becomes the owner of the wallet. The owner can:
+The contract creator becomes the owner of the wallet. The owner's private key should
+be stored very safely, preferably in an offline location, and the transactions
+from the owner accounts should be signed offline. 
+
+The owner can:
 
 - cancel withdrawals 
 - modify preferences 
@@ -26,7 +30,12 @@ The contract creator becomes the owner of the wallet. The owner can:
 - kill the contract
 
 #### Users
-Users are Ethereum addresses added to the contract by the owner. Users can:
+Users are Ethereum addresses added to the contract by the owner. Most of the 
+everyday interactions with the contract (i.e. withdrawals) are signed by the 
+user accounts. The private keys of these accounts can be stored in online devices
+without worrying.
+
+Users can:
 - request withdrawals from the contract
 
 
