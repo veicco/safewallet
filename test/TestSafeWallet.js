@@ -47,7 +47,7 @@ contract('SafeWallet', accounts => {
       const log = logs[0];
       assert.equal(log.event, "Deposit");
       assert.equal(log.args.from, alpha);
-      assert.equal(log.args.wei_amount.valueOf(), web3.toWei(1, "ether"));
+      assert.equal(log.args.weiAmount.valueOf(), web3.toWei(1, "ether"));
     });
 
   });
@@ -103,7 +103,7 @@ contract('SafeWallet', accounts => {
       assert.equal(log.event, "WithdrawalRequest");
       assert.equal(log.args.id, 0);
       assert.equal(log.args.to, alpha);
-      assert.equal(web3.fromWei(log.args.wei_amount, "ether"), 1);
+      assert.equal(web3.fromWei(log.args.weiAmount, "ether"), 1);
     });
 
   });
@@ -133,6 +133,8 @@ contract('SafeWallet', accounts => {
   });
 
   describe('confirmWithdrawal()', () => {
+
+    const CONFIRM_TIME = 1000 * 60 * 5;
 
     // create an initial instance, send 10 ether to the contract, and request a few withdrawals
     let instance;
@@ -167,7 +169,7 @@ contract('SafeWallet', accounts => {
 
     it("confirming withdrawal successfully transfers the funds, changes the withdrawal status, and fires an event", async () => {
       // confirm the first withdrawal as the user after 2000ms (should succeed)
-      const confirmation = await confirm(0, testUser, 2000);
+      const confirmation = await confirm(0, testUser,  CONFIRM_TIME + 2000);
 
       // check the balances
       assert.equal(getBalance(instance.address).toNumber(), 9);
@@ -184,14 +186,14 @@ contract('SafeWallet', accounts => {
       assert.equal(log.event, "WithdrawalConfirm");
       assert.equal(log.args.id, 0);
       assert.equal(log.args.to, beta);
-      assert.equal(web3.fromWei(log.args.wei_amount, "ether"), 1);
+      assert.equal(web3.fromWei(log.args.weiAmount, "ether"), 1);
     });
 
     it("confirming withdrawal fails if the withdrawal status is other than 0 (pending)", async () => {
       // try to confirm the first withdrawal second time as the user after 2000ms (should fail)
       let err = null;
       try {
-        await confirm(0, testUser, 2000);
+        await confirm(0, testUser, CONFIRM_TIME + 1000);
       } catch (error) {
         err = error;
       }
@@ -203,7 +205,7 @@ contract('SafeWallet', accounts => {
       // try to confirm the second withdrawal as the owner (should fail)
       let err = null;
       try {
-        await confirm(1, testOwner, 2000);
+        await confirm(1, testOwner, CONFIRM_TIME + 1000);
       } catch (error) {
         err = error;
       }
@@ -213,7 +215,7 @@ contract('SafeWallet', accounts => {
       // try to confirm the second withdrawal as an external user (should fail)
       err = null;
       try {
-        await confirm(1, alpha, 2000);
+        await confirm(1, alpha, CONFIRM_TIME + 1000);
       } catch (error) {
         err = error;
       }
@@ -225,7 +227,7 @@ contract('SafeWallet', accounts => {
       // try to confirm the third withdrawal (should fail)
       let err = null;
       try {
-        await confirm(2, testUser, 2000);
+        await confirm(2, testUser, CONFIRM_TIME + 1000);
       } catch (error) {
         err = error;
       }
@@ -295,7 +297,7 @@ contract('SafeWallet', accounts => {
       assert.equal(log.event, "WithdrawalCancel");
       assert.equal(log.args.id, 0);
       assert.equal(log.args.to, beta);
-      assert.equal(web3.fromWei(log.args.wei_amount, "ether"), 1);
+      assert.equal(web3.fromWei(log.args.weiAmount, "ether"), 1);
     });
 
 

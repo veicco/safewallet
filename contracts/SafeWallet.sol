@@ -1,12 +1,13 @@
 pragma solidity ^0.4.18;
 
+
 contract SafeWallet {
 
   /* Data */
   struct Withdrawal {
-    uint created_at;
+    uint createdAt;
     address to;
-    uint wei_amount;
+    uint weiAmount;
     uint status; // 0 = pending, 1 = completed, 2 = cancelled
   }
   mapping(uint => Withdrawal) private withdrawals;
@@ -20,10 +21,10 @@ contract SafeWallet {
   uint private withdrawalCount = 0;
 
   /* Events */
-  event Deposit(address from, uint wei_amount);
-  event WithdrawalRequest(uint id, address to, uint wei_amount);
-  event WithdrawalConfirm(uint id, address to, uint wei_amount);
-  event WithdrawalCancel(uint id, address to, uint wei_amount);
+  event Deposit(address from, uint weiAmount);
+  event WithdrawalRequest(uint id, address to, uint weiAmount);
+  event WithdrawalConfirm(uint id, address to, uint weiAmount);
+  event WithdrawalCancel(uint id, address to, uint weiAmount);
 
   /* Methods */
 
@@ -37,7 +38,7 @@ contract SafeWallet {
     user = _user;
 
     // set the default value for confirmTime
-    confirmTime = 1000;
+    confirmTime = 1000 * 60 * 5;
   }
 
   /// deposit funds to the contract
@@ -64,14 +65,14 @@ contract SafeWallet {
   function getWithdrawal(uint _id) public view returns (uint, address, uint, uint) {
     require(_id < withdrawalCount);
     Withdrawal storage withdrawal = withdrawals[_id];
-    return (withdrawal.created_at, withdrawal.to, withdrawal.wei_amount, withdrawal.status);
+    return (withdrawal.createdAt, withdrawal.to, withdrawal.weiAmount, withdrawal.status);
   }
 
   /// request for transfer of the given wei amount of funds to the given address
-  function requestWithdrawal(address _to, uint _wei_amount) public {
+  function requestWithdrawal(address _to, uint _weiAmount) public {
     require(msg.sender == user);
-    withdrawals[withdrawalCount] = Withdrawal(now, _to, _wei_amount, 0);
-    WithdrawalRequest(withdrawalCount, _to, _wei_amount);
+    withdrawals[withdrawalCount] = Withdrawal(block.timestamp, _to, _weiAmount, 0);
+    WithdrawalRequest(withdrawalCount, _to, _weiAmount);
     withdrawalCount += 1;
   }
 
@@ -88,19 +89,19 @@ contract SafeWallet {
     require(withdrawal.status == 0);
 
     // require enough time has passed
-    require(now - withdrawal.created_at >= confirmTime);
+    require(block.timestamp - withdrawal.createdAt >= confirmTime);
 
     // require the balance is enough
-    require(withdrawal.wei_amount <= this.balance);
+    require(withdrawal.weiAmount <= this.balance);
 
     // execute the transfer
-    withdrawal.to.transfer(withdrawal.wei_amount);
+    withdrawal.to.transfer(withdrawal.weiAmount);
 
     // change status of the withdrawal to completed
     withdrawal.status = 1;
 
     // fire an event
-    WithdrawalConfirm(_id, withdrawal.to, withdrawal.wei_amount);
+    WithdrawalConfirm(_id, withdrawal.to, withdrawal.weiAmount);
   }
 
   function cancelWithdrawal(uint _id) public {
@@ -118,7 +119,7 @@ contract SafeWallet {
     withdrawal.status = 2;
 
     // fire an event
-    WithdrawalCancel(_id, withdrawal.to, withdrawal.wei_amount);
+    WithdrawalCancel(_id, withdrawal.to, withdrawal.weiAmount);
   }
 
   /// kill the contract and return the remaining funds to the owner
