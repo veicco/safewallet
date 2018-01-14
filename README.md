@@ -82,16 +82,23 @@ TODO
 
 This project uses [Truffle framework](http://truffleframework.com/) which 
 provides Mocha + Chai libraries for testing solidity contracts through 
-[web3.js](https://github.com/ethereum/web3.js/) interface.
+[web3.js](https://github.com/ethereum/web3.js/) interface. For linting, 
+[Solium](https://github.com/duaraghav8/Solium) is used.
 
-Install Truffle:
+Install Truffle and Solium:
 ```
-npm install -g truffle
+npm install -g truffle 
+npm install -g solium
 ``` 
 
 Run unit tests:
 ```
 truffle test
+``` 
+
+Lint:
+```
+solium -d contracts/
 ``` 
 
 ## Future features:
