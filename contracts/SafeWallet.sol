@@ -58,6 +58,11 @@ contract SafeWallet {
     confirmTime = 1000;
   }
 
+  /// deposit funds to the contract
+  function () public payable {
+    Deposit(msg.sender, msg.value);
+  }
+
   /// get the user's address
   function getUser() public view returns(address) {
     return user;
@@ -138,12 +143,6 @@ contract SafeWallet {
   function kill() public {
     require(msg.sender == owner);
     selfdestruct(owner);
-
-  }
-
-  /// deposit funds to the contract
-  function () public payable {
-    Deposit(msg.sender, msg.value);
   }
 
 }

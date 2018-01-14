@@ -21,7 +21,7 @@ contract('SafeWallet', accounts => {
 
   const getBalance = (address) => web3.fromWei(web3.eth.getBalance(address), "ether");
 
-  describe('Constructor()', () => {
+  describe('constructor()', () => {
 
     it("the owner and the user are stored correctly", async () => {
       const instance = await SafeWallet.new(testUser, {from: testOwner});
@@ -33,7 +33,7 @@ contract('SafeWallet', accounts => {
 
   });
 
-  describe('Deposit()', () => {
+  describe('deposit()', () => {
 
     it("transfer to the contract fires an event correctly", async () => {
       const instance = await SafeWallet.new(testUser, {from: testOwner});
@@ -64,7 +64,6 @@ contract('SafeWallet', accounts => {
     });
 
     it("requesting withdrawal is allowed only by the user", async () => {
-
       // request a withdrawal as the user (should succeed)
       request = await instance.requestWithdrawal(alpha, web3.toWei(1, "ether"), {from: testUser});
 
@@ -82,11 +81,9 @@ contract('SafeWallet', accounts => {
       // check the withdrawalCount equals 1
       const count = await instance.getWithdrawalCount.call();
       assert.equal(count, 1);
-
     });
 
     it("requesting a withdrawal adds a new Withdrawal structure to the withdrawals mapping", async () => {
-
       // check the requested withdrawal exists
       const withdrawal = await instance.getWithdrawal.call(0);
 
@@ -97,7 +94,6 @@ contract('SafeWallet', accounts => {
     });
 
     it("requesting withdrawal fires an event correctly", async () => {
-
       // check the logs length equals one
       const logs = request.logs;
       assert.equal(logs.length, 1);
@@ -123,7 +119,6 @@ contract('SafeWallet', accounts => {
     });
 
     it("trying to get a non-existent withdrawal fails", async () => {
-
       // try to get a non-existent withdrawal
       let err = null;
       try {
@@ -133,12 +128,11 @@ contract('SafeWallet', accounts => {
       }
       // check it raises an exception
       assert.ok(err instanceof Error);
-
     })
 
   });
 
-  describe('confirmWithdrawal', () => {
+  describe('confirmWithdrawal()', () => {
 
     // create an initial instance, send 10 ether to the contract, and request a few withdrawals
     let instance;
@@ -160,7 +154,6 @@ contract('SafeWallet', accounts => {
     });
 
     it("confirming withdrawal fails if the defined confirmation time has not passed", async () => {
-
       // try to confirm the first withdrawal before confirmation time has passed (should fail)
       let err = null;
       try {
@@ -173,7 +166,6 @@ contract('SafeWallet', accounts => {
     });
 
     it("confirming withdrawal successfully transfers the funds, changes the withdrawal status, and fires an event", async () => {
-
       // confirm the first withdrawal as the user after 2000ms (should succeed)
       const confirmation = await confirm(0, testUser, 2000);
 
@@ -193,11 +185,9 @@ contract('SafeWallet', accounts => {
       assert.equal(log.args.id, 0);
       assert.equal(log.args.to, beta);
       assert.equal(web3.fromWei(log.args.wei_amount, "ether"), 1);
-
     });
 
     it("confirming withdrawal fails if the withdrawal status is other than 0 (pending)", async () => {
-
       // try to confirm the first withdrawal second time as the user after 2000ms (should fail)
       let err = null;
       try {
@@ -207,11 +197,9 @@ contract('SafeWallet', accounts => {
       }
       // check it raises an exception
       assert.ok(err instanceof Error);
-
     });
 
     it("confirming withdrawal is not allowed by other than the user", async () => {
-
       // try to confirm the second withdrawal as the owner (should fail)
       let err = null;
       try {
@@ -231,11 +219,9 @@ contract('SafeWallet', accounts => {
       }
       // check it raises an exception
       assert.ok(err instanceof Error);
-
     });
 
     it("confirming withdrawal fails if the contract does not have sufficient balance", async () => {
-
       // try to confirm the third withdrawal (should fail)
       let err = null;
       try {
@@ -269,7 +255,6 @@ contract('SafeWallet', accounts => {
     };
 
     it("cancelling withdrawal is allowed only by the owner and by the user", async () => {
-
       // try to cancel the first withdrawal as an external account (should fail)
       let err = null;
       try {
@@ -282,7 +267,6 @@ contract('SafeWallet', accounts => {
     });
 
     it("cancelling withdrawal changes the withdrawal status to 2 (cancelled)", async () => {
-
       // cancel the first withdrawal as the user (should succeed)
       cancellation = await cancel(0, testUser, 100);
 
@@ -299,7 +283,6 @@ contract('SafeWallet', accounts => {
       // check the status
       const withdrawal1 = await instance.getWithdrawal.call(1);
       assert.equal(withdrawal1[3], 2);
-
     });
 
     it("cancelling withdrawal fires an event correctly", () => {
@@ -317,7 +300,6 @@ contract('SafeWallet', accounts => {
 
 
     it("cancelling withdrawal fails if the status is not 0 (pending)", async () => {
-
       // try to cancel the first withdrawal second time (should fail)
       let err = null;
       try {
@@ -327,7 +309,6 @@ contract('SafeWallet', accounts => {
       }
       // check it raises an exception
       assert.ok(err instanceof Error);
-
     });
 
   });
@@ -346,7 +327,6 @@ contract('SafeWallet', accounts => {
     });
 
     it("kill is allowed only by the owner", async () => {
-
       // try to kill the contract as an external account
       let err = null;
       try {
@@ -365,18 +345,15 @@ contract('SafeWallet', accounts => {
       }
       // check it raises an exception
       assert.ok(err instanceof Error);
-
     });
 
     it("kill destroys the contract and returns the remaining funds to the owner", async () => {
-
       // kill the contract as the owner
       await instance.kill({from: testOwner});
 
       // check the balances
       assert.equal(getBalance(instance.address), 0);
       assert.ok(getBalance(testOwner) > 109);
-
     });
 
   });
