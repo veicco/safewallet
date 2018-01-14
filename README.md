@@ -6,6 +6,10 @@ Safe Wallet is a smart contract running on the Ethereum blockchain. It is
 a wallet for ETH and ERC20 tokens with additional features, including
 cancellation of withdrawals and tracking of events.
 
+Whenever a withdrawal is requested from the contract, an event is fired,
+allowing a web3.js client application to notify the owner who can cancel the
+withdrawal within a specified time.   
+
 A major benefit of using Safe Wallet instead of a vanilla address wallet is 
 that the private key file can be stored in less safe locations, such as 
 online mobile devices, without having to worry too much if a hacker or a thief
