@@ -70,15 +70,15 @@ The events can be listened by a client application which can notify users and ow
   </tr>
 </table>
 
-## Methods
+### Methods
 
 TODO
 
-## Deployment
+### Deployment
 
 TODO
 
-## Testing
+### Testing
 
 This project uses [Truffle framework](http://truffleframework.com/) which 
 provides Mocha + Chai libraries for testing solidity contracts through 
