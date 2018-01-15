@@ -7,7 +7,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "truffle test"
+    "test": "truffle test && solium -d contracts/"
   },
   "repository": {
     "type": "git",

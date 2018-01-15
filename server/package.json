@@ -1,0 +1,14 @@
+{
+  "name": "safewallet-server",
+  "version": "1.0.0",
+  "description": "Server application for Safe Wallet smart contract",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Veikko Kovanen",
+  "license": "MIT",
+  "dependencies": {
+    "web3": "^1.0.0-beta.27"
+  }
+}
