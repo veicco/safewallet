@@ -10,6 +10,7 @@
   "license": "MIT",
   "dependencies": {
     "eth-dagger": "0.0.1-beta.2",
+    "nodemailer": "^4.4.1",
     "web3": "^1.0.0-beta.27"
   }
 }

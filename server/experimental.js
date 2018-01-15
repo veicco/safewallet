@@ -7,9 +7,10 @@ var Dagger = require('eth-dagger');
 var dagger = new Dagger('mqtt://localhost:1883');
 
 // address of the deployed contract
-var address = '0xf25186b5081ff5ce73482ad761db0eb0d25abfbf';
+var address = '0x345ca3e014aaf5dca488057592ee47305d9b3e10';
 
 // watch contract logs
-dagger.on(address, function(result) {
-  console.log("Log: ", result);
+dagger.on("latest:log/" + address, function(result) {
+  console.log("Log:");
+  console.log(result);
 });
