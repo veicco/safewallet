@@ -70,14 +70,6 @@ The events can be listened by a client application which can notify users and ow
   </tr>
 </table>
 
-### Methods
-
-TODO
-
-### Deployment
-
-TODO
-
 ### Testing
 
 This project uses [Truffle framework](http://truffleframework.com/) which 
@@ -100,6 +92,10 @@ Lint:
 ```
 solium -d contracts/
 ``` 
+
+### Deployment
+
+TODO
 
 ## Future features:
  - ability to limit withdrawals to trusted addresses that are managed by the owner
