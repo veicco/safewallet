@@ -92,11 +92,3 @@ Lint:
 ```
 solium -d contracts/
 ``` 
-
-### Deployment
-
-TODO
-
-## Future features:
- - ability to limit withdrawals to trusted addresses that are managed by the owner
- - support for multiple users (shared wallet)
